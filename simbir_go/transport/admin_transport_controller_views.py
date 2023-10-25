@@ -16,6 +16,25 @@ from drf_yasg import openapi
 from .serializers import TransportSerializer
 
 
+def camel_case(i: str):
+    """
+    Creates a camelCase string based on a snake_case string
+    :param i: a snake_case string
+    :return: a camelCase str
+    """
+    s, t = '', False
+    for j in i:
+        if j == '_':
+            t = True
+        else:
+            if t:
+                s += j.upper()
+            else:
+                s += j
+            t = False
+    return s
+
+
 # This static function was made because validation is too long to rewrite it every time
 def read_transport_body(post_, all_required=True):
     """
@@ -37,7 +56,7 @@ def read_transport_body(post_, all_required=True):
     choices_dict = dict(Transport.TRANSPORT_CHOICES)
     if not (isinstance(owner_id, int) or (owner_id is None and not all_required)):
         errors += "ownerId must be present as an int; "
-    elif not User.objects.filter(id=owner_id).exists():
+    elif not User.objects.filter(id=owner_id).exists() and owner_id is not None:
         errors += "ownerId is present but doesn't match to any user; "
     if not (isinstance(can_be_rented, bool) or (can_be_rented is None and not all_required)):
         errors += "canBeRented must be present as a bool; "
@@ -58,7 +77,7 @@ def read_transport_body(post_, all_required=True):
     if not isinstance(description, str) and description is not None:
         errors += "description must either not be present or a be string; "
 
-    if not (isinstance(latitude, float) or not (latitude is None and not all_required)):
+    if not (isinstance(latitude, float) or (latitude is None and not all_required)):
         errors += "latitude must be present as a float (double); "
 
     if not (isinstance(longitude, float) or (longitude is None and not all_required)):
@@ -75,6 +94,7 @@ def read_transport_body(post_, all_required=True):
 
     transport_type = Transport.CHOICE_TO_TRANSPORT.get(transport_type)
     data = {"owner_id": owner_id,
+            "owner": owner_id,
             "can_be_rented": can_be_rented,
             "transport_type": transport_type,
             "model": model,
@@ -91,7 +111,7 @@ def read_transport_body(post_, all_required=True):
     # it's None
     data_result = {}
     for i, j in data.items():
-        if i in post_.keys():
+        if camel_case(i) in post_.keys():
             data_result[i] = j
     return True, data_result
 
@@ -204,8 +224,9 @@ class AdminTransportViewSetWithoutId(ViewSet):
             return response_400
         data = response_400  # in case of is_valid = True, response_400 is a tuple with variables
         serialized = self.serializer_class(None, data)
+        print(data)
         if not serialized.is_valid():
-            return Response({"detail":serialized.errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": serialized.errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         self.serializer_class.create(self.serializer_class(), data)
         return Response(serialized.data, status=status.HTTP_201_CREATED)
 

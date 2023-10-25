@@ -12,7 +12,7 @@ from .models import Rent
 from datetime import datetime
 import json
 """ QUERY PARAMS FOR THIS WEIRD SWAGGER"""
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema, no_body
 from drf_yasg import openapi
 """ QUERY PARAMS FOR THIS WEIRD SWAGGER"""
 
@@ -163,7 +163,10 @@ class NewRent(generics.GenericAPIView):
 
     @swagger_auto_schema(tags=['Rent controller'],
                          manual_parameters=[openapi.Parameter('transportId', in_=openapi.IN_PATH,
-                                                              type=openapi.TYPE_INTEGER, required=True)],
+                                                              type=openapi.TYPE_INTEGER, required=True),
+                                            openapi.Parameter('rentType', in_=openapi.IN_QUERY,
+                                                              type=openapi.TYPE_STRING, required=True)],
+                         request_body=no_body,
                          responses={
                              403: openapi.Schema(type=openapi.TYPE_OBJECT,
                                                  properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}),

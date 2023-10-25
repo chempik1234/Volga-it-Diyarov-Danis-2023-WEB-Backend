@@ -22,6 +22,25 @@ from transport.serializers import TransportSerializer
 from .serializers import RentSerializer
 
 
+def camel_case(i: str):
+    """
+    Creates a camelCase string based on a snake_case string
+    :param i: a snake_case string
+    :return: a camelCase str
+    """
+    s, t = '', False
+    for j in i:
+        if j == '_':
+            t = True
+        else:
+            if t:
+                s += j.upper()
+            else:
+                s += j
+            t = False
+    return s
+
+
 def read_post(post_, all_required=True):
     data = {
         "transport_id": post_.get("transportId"),
@@ -62,7 +81,7 @@ def read_post(post_, all_required=True):
     else:
         data_res = {}
         for i, j in data.items():
-            if i in post_.keys():
+            if camel_case(i) in post_.keys():
                 data_res[i] = j
         # if "timeEnd" not in post_.keys():
         #     data.pop("time_end")
