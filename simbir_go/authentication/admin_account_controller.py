@@ -28,9 +28,11 @@ class AdminAccountsViewSet(ViewSet):
     queryset = User.objects.all()
 
     @swagger_auto_schema(manual_parameters=[openapi.Parameter('start', in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER,
-                                                              required=True),
+                                                              required=True,
+                                                              description="Id which users are counted from"),
                                             openapi.Parameter('count', in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER,
-                                                              required=True)],
+                                                              required=True,
+                                                              description="Selection size (amount of id's)")],
                          tags=['Admin account controller'],
                          responses={
                              400: openapi.Schema(type=openapi.TYPE_OBJECT,
@@ -58,7 +60,7 @@ class AdminAccountsViewSet(ViewSet):
         if errors:
             return Response({"detail": "Bad request: " + errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        queryset = self.queryset.filter(id__gte=int(start), id__lt=int(start) + int(count))
+        queryset = self.queryset.filter(id__gte=int(start), id__lt=int(start) + int(count), is_active=True)
         serialized = self.serializer_class(queryset, many=True)  # Many=True is used because a list is needed
         return Response(serialized.data, status=status.HTTP_200_OK)
 
@@ -181,6 +183,6 @@ class AdminAccountsViewSetWithId(ViewSet):
                              404: openapi.Schema(type=openapi.TYPE_OBJECT)})
     def delete(self, request, id):
         user = get_object_or_404(User, id=id)
-        user.is_active = False
+        self.serializer_class.update(self.serializer_class(), user, {"is_active": False})
         return Response({'detail': 'Successfully deleted (made inactive) account with given id.'},
                         status=status.HTTP_200_OK)

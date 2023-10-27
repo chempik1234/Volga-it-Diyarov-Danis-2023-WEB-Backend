@@ -128,10 +128,14 @@ class AdminTransportViewSetWithoutId(ViewSet):
     queryset = Transport.objects.all()
 
     @swagger_auto_schema(tags=['Admin transport controller'],
-                         manual_parameters=[openapi.Parameter('start', in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER),
-                                            openapi.Parameter('count', in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER),
+                         manual_parameters=[openapi.Parameter('start', in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER,
+                                                              description="Id which transports are counted from"),
+                                            openapi.Parameter('count', in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER,
+                                                              description="Selection size (amount of id's)"),
                                             openapi.Parameter('transportType', in_=openapi.IN_QUERY,
-                                                              type=openapi.TYPE_STRING)],
+                                                              type=openapi.TYPE_STRING,
+                                                              description="Type of the transport (Car / Bike / Scooter "
+                                                                          "/ All)")],
                          request_body=no_body,
                          responses={
                              # 200: openapi.Schema(type=openapi.TYPE_OBJECT,
@@ -180,26 +184,38 @@ class AdminTransportViewSetWithoutId(ViewSet):
                                        'latitude', 'longitude'],
                              properties={
                                  'ownerId': openapi.Schema('ownerId', in_=openapi.IN_BODY,
-                                                               type=openapi.TYPE_INTEGER),
+                                                           type=openapi.TYPE_INTEGER,
+                                                           description="Id of the transport owner"),
                                  'canBeRented': openapi.Schema('canBeRented', in_=openapi.IN_BODY,
-                                                               type=openapi.TYPE_BOOLEAN),
+                                                               type=openapi.TYPE_BOOLEAN,
+                                                               description="Determines if the transport can be rented "
+                                                                           "(false when there's an active rent!)"),
                                  'transportType': openapi.Schema('transportType', in_=openapi.IN_BODY,
-                                                                 type=openapi.TYPE_STRING),
+                                                                 type=openapi.TYPE_STRING,
+                                                                 description="Type of the transport (Car / Bike / Scoot"
+                                                                             "er"),
                                  'model': openapi.Schema('model', in_=openapi.IN_BODY,
-                                                         type=openapi.TYPE_STRING),
-                                 'color': openapi.Schema('color', in_=openapi.IN_BODY, type=openapi.TYPE_STRING),
+                                                         type=openapi.TYPE_STRING, description="Transport's model title"),
+                                 'color': openapi.Schema('color', in_=openapi.IN_BODY, type=openapi.TYPE_STRING,
+                                                         description="Color of the transport"),
                                  'identifier': openapi.Schema('identifier', in_=openapi.IN_BODY,
-                                                              type=openapi.TYPE_STRING),
+                                                              type=openapi.TYPE_STRING,
+                                                              description="License plate"),
                                  'description': openapi.Schema('description', in_=openapi.IN_BODY,
-                                                               type=openapi.TYPE_STRING),
+                                                               type=openapi.TYPE_STRING,
+                                                               description="Transport's description"),
                                  'latitude': openapi.Schema('latitude', in_=openapi.IN_BODY,
-                                                            type=openapi.TYPE_NUMBER),
+                                                            type=openapi.TYPE_NUMBER,
+                                                            description="Transport's current latitude"),
                                  'longitude': openapi.Schema('longitude', in_=openapi.IN_BODY,
-                                                             type=openapi.TYPE_NUMBER),
+                                                             type=openapi.TYPE_NUMBER,
+                                                             description="Transport's current longitude"),
                                  'dayPrice': openapi.Schema('dayPrice', in_=openapi.IN_BODY,
-                                                            type=openapi.TYPE_NUMBER),
+                                                            type=openapi.TYPE_NUMBER,
+                                                            description="The price of a minute of a rent"),
                                  'minutePrice': openapi.Schema('minutePrice', in_=openapi.IN_BODY,
-                                                               type=openapi.TYPE_NUMBER),
+                                                               type=openapi.TYPE_NUMBER,
+                                                               description="The price of a day of a rent"),
                              }),
                          responses={
                              # 200: openapi.Schema(type=openapi.TYPE_OBJECT,
@@ -244,6 +260,7 @@ class AdminTransportViewSetWithId(ViewSet):
     queryset = Transport.objects.all()
 
     @swagger_auto_schema(tags=['Admin transport controller'],
+                         operation_description="GET /api/Admin/Transport/{id} - get transport fields",
                          manual_parameters=[openapi.Parameter('id', type=openapi.TYPE_INTEGER, in_=openapi.IN_PATH)],
                          responses={
                              # 200: openapi.Schema(type=openapi.TYPE_OBJECT,
@@ -258,6 +275,7 @@ class AdminTransportViewSetWithId(ViewSet):
         return Response(self.serializer_class(transport).data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(tags=['Admin transport controller'],
+                         operation_description="PUT /api/Admin/Transport/{id} - update transport fields",
                          manual_parameters=[openapi.Parameter('id', type=openapi.TYPE_INTEGER, in_=openapi.IN_PATH)],
                          request_body=openapi.Schema(
                              type=openapi.TYPE_OBJECT,
@@ -311,6 +329,7 @@ class AdminTransportViewSetWithId(ViewSet):
         return Response({"detail": "Updated fields successfully."}, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(tags=['Admin transport controller'],
+                         operation_description="DELETE /api/Admin/Transport/{id} - delete transport",
                          manual_parameters=[openapi.Parameter('id', type=openapi.TYPE_INTEGER, in_=openapi.IN_PATH)],
                          responses={
                              200: openapi.Schema(type=openapi.TYPE_OBJECT,

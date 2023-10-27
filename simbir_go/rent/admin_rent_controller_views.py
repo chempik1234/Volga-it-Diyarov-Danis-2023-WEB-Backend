@@ -109,20 +109,29 @@ class AdminRentViewSetWithId(ViewSet):
         return Response(serialized.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(tags=['Admin rent controller'],
+                         operation_description="PUT /api/Admin/Rent/{rentId} "
+                                               "Update information about a rent using it's id",
                          request_body=openapi.Schema(
                              type=openapi.TYPE_OBJECT,
                              properties={
                                  'transport_id': openapi.Schema('transport_id', in_=openapi.IN_BODY,
-                                                                type=openapi.TYPE_INTEGER),
-                                 'user_id': openapi.Schema('user_id', in_=openapi.IN_BODY, type=openapi.TYPE_INTEGER),
+                                                                type=openapi.TYPE_INTEGER,
+                                                                description="Id of the rented transport."),
+                                 'user_id': openapi.Schema('user_id', in_=openapi.IN_BODY, type=openapi.TYPE_INTEGER,
+                                                           description="Id of the renter (a user)."),
                                  'time_start': openapi.Schema('time_start', in_=openapi.IN_BODY,
-                                                              type=openapi.TYPE_STRING),
-                                 'time_end': openapi.Schema('time_end', in_=openapi.IN_BODY, type=openapi.TYPE_STRING),
+                                                              type=openapi.TYPE_STRING,
+                                                              description="Rental start date-time (iso format)"),
+                                 'time_end': openapi.Schema('time_end', in_=openapi.IN_BODY, type=openapi.TYPE_STRING,
+                                                            description="Rental end date-time (iso format)"),
                                  'price_of_unit': openapi.Schema('price_of_unit', in_=openapi.IN_BODY,
-                                                                 type=openapi.TYPE_NUMBER),
-                                 'type': openapi.Schema('type', in_=openapi.IN_BODY, type=openapi.TYPE_STRING),
+                                                                 type=openapi.TYPE_NUMBER,
+                                                                 description="Rental price (per minute or day)"),
+                                 'type': openapi.Schema('type', in_=openapi.IN_BODY, type=openapi.TYPE_STRING,
+                                                        description="Rental type (Days / Minutes)"),
                                  'final_price': openapi.Schema('final_price', in_=openapi.IN_BODY,
-                                                               type=openapi.TYPE_INTEGER)
+                                                               type=openapi.TYPE_INTEGER,
+                                                               description="Rental final (total) price")
                              }),
                          responses={
                              200: openapi.Schema(type=openapi.TYPE_OBJECT,
@@ -145,7 +154,8 @@ class AdminRentViewSetWithId(ViewSet):
 
     @swagger_auto_schema(tags=['Admin rent controller'],
                          manual_parameters=[openapi.Parameter('rentId', in_=openapi.IN_PATH,
-                                                              type=openapi.TYPE_INTEGER)])
+                                                              type=openapi.TYPE_INTEGER,
+                                                              description="Id of the deleted rent")])
     def delete(self, request, rentId):
         rent = get_object_or_404(Rent, id=rentId)
         rent.delete()
@@ -164,7 +174,9 @@ class AdminUserHistory(generics.GenericAPIView):
 
     @swagger_auto_schema(tags=['Admin rent controller'],
                          manual_parameters=[openapi.Parameter('userId', in_=openapi.IN_PATH,
-                                                              type=openapi.TYPE_INTEGER)])
+                                                              type=openapi.TYPE_INTEGER,
+                                                              description="Id of the user whose rental history is "
+                                                                          "got.")])
     def get(self, request, userId):
         queryset = Rent.objects.filter(user_id__id=userId)  # returns all rents made by current user
         serialized = self.serializer_class(queryset, many=True)  # Many=True is used because a list is needed
@@ -183,7 +195,8 @@ class AdminTransportHistory(generics.GenericAPIView):
 
     @swagger_auto_schema(tags=['Admin rent controller'],
                          manual_parameters=[openapi.Parameter('transportId', in_=openapi.IN_PATH,
-                                                              type=openapi.TYPE_INTEGER)],
+                                                              type=openapi.TYPE_INTEGER,
+                                                              description="Id of the transport whose history is got")],
                          responses={
                              404: openapi.Schema(type=openapi.TYPE_OBJECT,
                                                  properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)})})
@@ -211,16 +224,23 @@ class AdminNewRent(generics.GenericAPIView):
                                        'type'],
                              properties={
                                  'transport_id': openapi.Schema('transport_id', in_=openapi.IN_BODY,
-                                                                type=openapi.TYPE_INTEGER),
-                                 'user_id': openapi.Schema('user_id', in_=openapi.IN_BODY, type=openapi.TYPE_INTEGER),
+                                                                type=openapi.TYPE_INTEGER,
+                                                                description="Id of the rented transport."),
+                                 'user_id': openapi.Schema('user_id', in_=openapi.IN_BODY, type=openapi.TYPE_INTEGER,
+                                                           description="Id of the renter (a user)."),
                                  'time_start': openapi.Schema('time_start', in_=openapi.IN_BODY,
-                                                              type=openapi.TYPE_STRING),
-                                 'time_end': openapi.Schema('time_end', in_=openapi.IN_BODY, type=openapi.TYPE_STRING),
+                                                              type=openapi.TYPE_STRING,
+                                                              description="Rental start date-time (iso format)"),
+                                 'time_end': openapi.Schema('time_end', in_=openapi.IN_BODY, type=openapi.TYPE_STRING,
+                                                            description="Rental end date-time (iso format)"),
                                  'price_of_unit': openapi.Schema('price_of_unit', in_=openapi.IN_BODY,
-                                                                 type=openapi.TYPE_NUMBER),
-                                 'type': openapi.Schema('type', in_=openapi.IN_BODY, type=openapi.TYPE_STRING),
+                                                                 type=openapi.TYPE_NUMBER,
+                                                                 description="Rental price (per minute or day)"),
+                                 'type': openapi.Schema('type', in_=openapi.IN_BODY, type=openapi.TYPE_STRING,
+                                                        description="Rental type (Days / Minutes)"),
                                  'final_price': openapi.Schema('final_price', in_=openapi.IN_BODY,
-                                                               type=openapi.TYPE_INTEGER)
+                                                               type=openapi.TYPE_INTEGER,
+                                                               description="Rental final (total) price")
                              }),
                          responses={
                              400: openapi.Schema(type=openapi.TYPE_OBJECT,
@@ -265,11 +285,14 @@ class AdminEndRent(generics.GenericAPIView):
 
     @swagger_auto_schema(tags=['Admin rent controller'],
                          manual_parameters=[openapi.Parameter('rentId', in_=openapi.IN_PATH, type=openapi.TYPE_INTEGER,
-                                                              required=True),
+                                                              required=True,
+                                                              description="Id of the rent which is ended"),
                                             openapi.Parameter('lat', in_=openapi.IN_QUERY, type=openapi.TYPE_NUMBER,
-                                                              required=True),
+                                                              required=True,
+                                                              description="Current latitude of the rented transport"),
                                             openapi.Parameter('long', in_=openapi.IN_QUERY, type=openapi.TYPE_NUMBER,
-                                                              required=True)],
+                                                              required=True,
+                                                              description="Current longitude of the rented transport")],
                          request_body=no_body,
                          # required=['rentId', 'lat', 'long'],
                          responses={

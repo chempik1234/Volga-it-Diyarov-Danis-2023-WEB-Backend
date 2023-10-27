@@ -32,9 +32,12 @@ class GetAvailableTransport(generics.GenericAPIView):
 
     @swagger_auto_schema(tags=['Rent controller'],
                          manual_parameters=
-                         [openapi.Parameter('longitude', in_=openapi.IN_QUERY, type=openapi.TYPE_NUMBER, required=True),
-                          openapi.Parameter('latitude', in_=openapi.IN_QUERY, type=openapi.TYPE_NUMBER, required=True),
-                          openapi.Parameter('radius', in_=openapi.IN_QUERY, type=openapi.TYPE_NUMBER, required=True),
+                         [openapi.Parameter('longitude', in_=openapi.IN_QUERY, type=openapi.TYPE_NUMBER, required=True,
+                                            description="Longitude near which the transport is searched for"),
+                          openapi.Parameter('latitude', in_=openapi.IN_QUERY, type=openapi.TYPE_NUMBER, required=True,
+                                            description="Latitude near which the transport is searched for"),
+                          openapi.Parameter('radius', in_=openapi.IN_QUERY, type=openapi.TYPE_NUMBER, required=True,
+                                            description="Radius in which the transport is searched for"),
                           openapi.Parameter('type', in_=openapi.IN_QUERY, type=openapi.TYPE_STRING,
                                             required=True)],
                          responses={
@@ -88,7 +91,8 @@ class GetRent(generics.GenericAPIView):
 
     @swagger_auto_schema(tags=['Rent controller'],
                          manual_parameters=
-                         [openapi.Parameter('rentId', in_=openapi.IN_PATH, type=openapi.TYPE_INTEGER, required=True)],
+                         [openapi.Parameter('rentId', in_=openapi.IN_PATH, type=openapi.TYPE_INTEGER, required=True,
+                                            description="Id of the rent about which the info is received")],
                          responses={
                              # 200: openapi.Schema(type=openapi.TYPE_OBJECT,
                              #                     properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}),
@@ -134,7 +138,7 @@ class TransportHistory(generics.GenericAPIView):
     @swagger_auto_schema(tags=['Rent controller'],
                          manual_parameters=
                          [openapi.Parameter('transportId', in_=openapi.IN_PATH, type=openapi.TYPE_INTEGER,
-                                            required=True)],
+                                            required=True, description="Id of the transport whose history is got")],
                          responses={
                              # 200: openapi.Schema(type=openapi.TYPE_OBJECT,
                              #                     properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}),
@@ -163,9 +167,11 @@ class NewRent(generics.GenericAPIView):
 
     @swagger_auto_schema(tags=['Rent controller'],
                          manual_parameters=[openapi.Parameter('transportId', in_=openapi.IN_PATH,
-                                                              type=openapi.TYPE_INTEGER, required=True),
+                                                              type=openapi.TYPE_INTEGER, required=True,
+                                                              description="Id of the rented transport"),
                                             openapi.Parameter('rentType', in_=openapi.IN_QUERY,
-                                                              type=openapi.TYPE_STRING, required=True)],
+                                                              type=openapi.TYPE_STRING, required=True,
+                                                              description="Type of the rent (Days / Minutes)")],
                          request_body=no_body,
                          responses={
                              403: openapi.Schema(type=openapi.TYPE_OBJECT,
@@ -215,9 +221,12 @@ class EndRent(generics.GenericAPIView):
 
     @swagger_auto_schema(tags=['Rent controller'],
                          manual_parameters=
-                         [openapi.Parameter('rentId', in_=openapi.IN_PATH, type=openapi.TYPE_INTEGER, required=True),
-                          openapi.Parameter('lat', in_=openapi.IN_QUERY, type=openapi.TYPE_NUMBER, required=True),
-                          openapi.Parameter('long', in_=openapi.IN_QUERY, type=openapi.TYPE_NUMBER, required=True)],
+                         [openapi.Parameter('rentId', in_=openapi.IN_PATH, type=openapi.TYPE_INTEGER, required=True,
+                                            description="Id of the rent which is ended"),
+                          openapi.Parameter('lat', in_=openapi.IN_QUERY, type=openapi.TYPE_NUMBER, required=True,
+                                            description="Current latitude of the rented transport"),
+                          openapi.Parameter('long', in_=openapi.IN_QUERY, type=openapi.TYPE_NUMBER, required=True,
+                                            description="Current longitude of the rented transport")],
                          responses={
                              403: openapi.Schema(type=openapi.TYPE_OBJECT,
                                                  properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}),
